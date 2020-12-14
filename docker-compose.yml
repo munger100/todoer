@@ -12,3 +12,18 @@ services:
       - /app/.next
       - .:/app
     restart: always
+    environment:
+      DATABASE_URL: postgres://todoer:todoer@app-database/todoer
+  app-database:
+    image: postgres
+    ports:
+      - "35433:5432"
+    environment:
+      POSTGRES_DB: todoer
+      POSTGRES_USER: todoer
+      POSTGRES_PASSWORD: todoer
+    volumes:
+      - app-database:/var/lib/postgresql/data
+
+volumes:
+  app-database:
