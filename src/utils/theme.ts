@@ -1,6 +1,7 @@
-import {createMuiTheme} from "@material-ui/core";
+import { createMuiTheme } from "@material-ui/core";
 
 export default createMuiTheme({
+  spacing: 8,
   typography: {
     fontFamily: [
       "Source Sans Pro",
