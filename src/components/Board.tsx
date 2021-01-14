@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Board({ name, id, color, tasks }: IBoardProps) {
+export default function Board({ name, id, color, tasks = [] }: IBoardProps) {
   const dispatch = useDispatch();
   const classes = useStyles({});
 
