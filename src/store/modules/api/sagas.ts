@@ -1,6 +1,8 @@
-import { put, call } from "@redux-saga/core/effects";
+import { put, call, select } from "@redux-saga/core/effects";
 import { IErrorsResponse } from "../../../api/types";
 import { apiActions } from ".";
+import { selectSession } from "../user/selectors";
+import { selectSignature } from "../auth/selectors";
 
 export class ApiErrors extends Error {
   readonly errors: string[];
@@ -44,6 +46,18 @@ export function* fetchApi<BodyType = object>(
     const headers: HeadersInit = {
       accept: "application/json",
     };
+
+    const token: string | undefined =
+      options.token || (yield select(selectSession))?.token;
+    const signature: string | undefined = yield select(selectSignature);
+
+    if (token && !headers["authorization"]) {
+      headers["authorization"] = `Bearer ${token}`;
+    }
+
+    if (signature) {
+      headers["x-signature"] = signature;
+    }
 
     if (options.key) {
       yield put(apiActions.startRequest(options.key));

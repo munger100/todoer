@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+    id String @id @default(uuid())
+
+    email String @unique
+    password String
+    name String
+}
+
+model Session {
+  token String @id
+
+  user User @relation(fields: [userId])
+  userId String
+}
+
+model Board {
+    id String @id @default(uuid())
+
+    name String
+    color String?
+
+    tasks Task[]
+
+    owner User @relation(fields: [ownerId])
+    ownerId String
+}
+
+enum Reminder {
+    hour
+    day
+    week
+}
+
+model Task {
+    id String @id @default(uuid())
+    label String
+
+    reminder Reminder?
+
+    deadline DateTime?
+    completed Boolean
+
+    assignee User @relation(fields: [assigneeId])
+    assigneeId String
+}
+

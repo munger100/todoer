@@ -11,3 +11,12 @@ export interface IEditBoardAction extends IBoardAction {
   name?: string;
   color?: string;
 }
+
+export interface ITaskAction {
+  boardId: string;
+  taskId: string;
+}
+
+export interface IEditTaskAction extends ITaskAction {
+  label: string;
+}

@@ -10,10 +10,21 @@ export default middleware<IFetchBoardsResponse>(
     const newBoard = await prisma.board.create({
       data: {
         name: data.name,
+        owner: {
+          connect: {
+            id: req.user.id,
+          },
+        },
       },
     });
 
-    const boards = await prisma.board.findMany({});
+    const boards = await prisma.board.findMany({
+      where: {
+        owner: {
+          id: req.user.id,
+        },
+      },
+    });
 
     return {
       boards,

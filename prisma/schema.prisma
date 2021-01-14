@@ -18,6 +18,13 @@ model User {
     name String
 }
 
+model Session {
+  token String @id
+
+  user User @relation(fields: [userId])
+  userId String
+}
+
 model Board {
     id String @id @default(uuid())
 
@@ -25,6 +32,9 @@ model Board {
     color String?
 
     tasks Task[]
+
+    owner User @relation(fields: [ownerId])
+    ownerId String
 }
 
 enum Reminder {

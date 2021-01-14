@@ -1,10 +1,10 @@
-import { ITask } from "./tasks";
+import { Task, Board } from "@prisma/client";
 
 export interface IBoard {
   id: string;
   name: string;
   color?: string;
-  tasks?: ITask[];
+  tasks?: Task[];
 }
 
 export interface ICreateBoardsPayload {
@@ -16,9 +16,8 @@ export interface IEditBoardsPayload {
   id: string;
   name?: string;
   color?: string;
-  tasks?: ITask[];
 }
 
 export interface IFetchBoardsResponse {
-  boards: IBoard[];
+  boards: Board[];
 }

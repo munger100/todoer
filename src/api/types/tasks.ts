@@ -7,13 +7,10 @@ enum IReminder {
 export interface ITask {
   id: string;
   label: string;
-  reminder?: IReminder;
-  deadline?: Date;
   completed: boolean;
 }
 
 export interface ICreateTaskPayload {
+  id: string;
   label: string;
-  reminder?: IReminder;
-  deadline?: Date;
 }

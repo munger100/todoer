@@ -4,8 +4,13 @@ import { IErrorsResponse } from "./types";
 import { ApiErrors } from "./ApiErrors";
 import { Errors } from "./errors";
 import { ValidationError } from "yup";
-
-export type AppRequest = NextApiRequest;
+import { prisma } from "./prisma";
+import {
+  BoardGetPayload,
+  Session,
+  UserGetPayload,
+  TaskGetPayload,
+} from "@prisma/client";
 
 export enum AuthType {
   User = "user",
@@ -14,6 +19,17 @@ export enum AuthType {
 export interface IMiddlewareOptions {
   auth?: boolean | AuthType;
 }
+
+export type AppRequest = NextApiRequest & {
+  board?: BoardGetPayload<{
+    include: {
+      tasks: true;
+    };
+  }>;
+  session?: Session;
+  user?: UserGetPayload<{}>;
+  task?: TaskGetPayload<{}>;
+};
 
 export type NextHandler<T> = (
   req: AppRequest,
@@ -28,7 +44,7 @@ export function middleware<ResultType>(
     try {
       if (options.auth) {
         if (options.auth === AuthType.User) {
-          console.log("Auth");
+          await doUserAuthentication(req);
         } else {
           throw new ApiErrors([Errors.InvalidAuthorization], 400);
         }
@@ -70,4 +86,42 @@ export function middleware<ResultType>(
       }
     }
   };
+}
+
+async function doUserAuthentication(req: AppRequest) {
+  if (
+    (!req.headers["authorization"] ||
+      req.headers["authorization"].length !== 7 + 32 ||
+      !req.headers["authorization"].startsWith("Bearer ")) &&
+    !req.query["_token"]
+  ) {
+    throw new ApiErrors([Errors.InvalidAuthorization], 400);
+  }
+
+  const token =
+    req.headers["authorization"]?.slice(7) || (req.query["_token"] as string);
+
+  // if (
+  //   !verifyTokenSignature(
+  //     token,
+  //     req.cookies[signatureCookieName] || (req.headers["x-signature"] as string)
+  //   )
+  // ) {
+  //   // TODO: verifyTokenSignature
+  //   throw new ApiErrors([Errors.InvalidAuthorization], 400);
+  // }
+
+  const session = await prisma.session.findOne({
+    where: { token },
+    include: {
+      user: true,
+    },
+  });
+
+  if (!session) {
+    throw new ApiErrors([Errors.InvalidAuthorization], 400);
+  }
+
+  req.session = session;
+  req.user = session.user;
 }

@@ -7,15 +7,30 @@ export default middleware<IFetchBoardsResponse>(
   async (req, res) => {
     const data = await CreateTaskSchema.validate(req.body);
 
-    const newTask = await prisma.tasks.create({
+    const newTask = await prisma.task.create({
       data: {
         label: data.label,
-        reminder: data.reminder,
-        deadline: data.deadline,
+        // reminder: data.reminder,
+        // deadline: data.deadline,
+        completed: false,
+        assignee: {
+          connect: {
+            id: req.user.id,
+          },
+        },
+        Board: {
+          connect: {
+            id: req.query.boardId as string,
+          },
+        },
       },
     });
 
-    const boards = await prisma.board.findMany({});
+    const boards = await prisma.board.findMany({
+      include: {
+        tasks: true,
+      },
+    });
 
     return {
       boards,

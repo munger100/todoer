@@ -1,13 +1,12 @@
 import React from "react";
 import { CssBaseline, MuiThemeProvider } from "@material-ui/core";
 import type { AppContext } from "next/app";
-import theme from "../src/utils/theme.ts";
-import createStore from "../src/store";
+import theme from "../src/utils/theme";
+import createStore, { IWithStore } from "../src/store";
 import { Provider } from "react-redux";
 import App from "next/app";
 import withReduxSaga from "next-redux-saga";
 import withRedux from "next-redux-wrapper";
-import { IWithStore } from "../../vote/src/store";
 
 class RootApp extends App<IWithStore> {
   static async getInitialProps({ Component, ctx }: AppContext) {

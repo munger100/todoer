@@ -65,7 +65,7 @@ export function BoxSpacer({
 }
 
 export function FlexSpacer(props: BoxProps) {
-  const classes = useStyles();
+  const classes = useStyles({});
 
   return <Box {...props} className={clsx(classes.flex, props.className)} />;
 }

@@ -1,3 +1,5 @@
 # Prisma Migrate lockfile v1
 
 20201230003614-initial
+20210111230857-add-session
+20210112003803-add-board-owner

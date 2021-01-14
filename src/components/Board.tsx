@@ -4,21 +4,30 @@ import {
   CardContent,
   makeStyles,
   Button,
+  TextField,
 } from "@material-ui/core";
-import { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useFormik } from "formik";
 import { boardsActions } from "../store/modules/boards";
+import { IEditBoardsPayload } from "../api/types/boards";
+import { ITask } from "../api/types/tasks";
+import { spreadField } from "../utils/formik";
+import { EditBoardSchema } from "../utils/validation/board";
+import CreateTask from "./CreateTask";
+import Task from "./Task";
 
 interface IBoardProps {
   id: string;
   name: string;
   color?: string;
+  tasks?: ITask[];
 }
 
 const useStyles = makeStyles((theme) => ({
   card: {
     width: "100%",
-    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2),
   },
   cardActions: {
     display: "flex",
@@ -26,19 +35,79 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Board({ name, id }: IBoardProps) {
+export default function Board({ name, id, color, tasks }: IBoardProps) {
   const dispatch = useDispatch();
+  const classes = useStyles({});
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const toggleEditing = useCallback(() => {
+    setIsEditing(!isEditing);
+  }, [isEditing, setIsEditing]);
+
   const deleteBoardHandler = useCallback(() => {
     dispatch(boardsActions.delete(id));
   }, [id]);
-  const classes = useStyles();
 
-  return (
+  const formik = useFormik<IEditBoardsPayload>({
+    initialValues: {
+      id,
+      name,
+      color: color || "",
+    },
+    validationSchema: EditBoardSchema,
+    onSubmit: () => {},
+  });
+
+  const editBoardHandler = useCallback(() => {
+    dispatch(boardsActions.edit(formik.values));
+    toggleEditing();
+  }, [formik]);
+
+  const createTaskHandler = useCallback(
+    (values) => {
+      dispatch(
+        boardsActions.createTask({
+          ...values,
+          id,
+        })
+      );
+    },
+    [id]
+  );
+
+  const sortedTasks = [...tasks].sort((a, b) => a.id.localeCompare(b.id));
+
+  return isEditing ? (
+    <Card className={classes.card}>
+      <form onSubmit={() => formik.handleSubmit()}>
+        <CardHeader
+          title={<TextField label="Name" {...spreadField(formik, "name")} />}
+        />
+        <CardContent>
+          {sortedTasks?.map((props, idx) => (
+            <Task key={idx} boardId={id} isEditing {...props} />
+          ))}
+          <CreateTask createTaskHandler={createTaskHandler} />
+        </CardContent>
+        <CardContent className={classes.cardActions}>
+          <Button onClick={editBoardHandler}>Save</Button>
+          <Button onClick={toggleEditing}>Discard Changes</Button>
+          <Button onClick={deleteBoardHandler}>Delete</Button>
+        </CardContent>
+      </form>
+    </Card>
+  ) : (
     <Card className={classes.card}>
       <CardHeader title={name} titleTypographyProps={{ variant: "h5" }} />
-      <CardContent></CardContent>
+      <CardContent>
+        {sortedTasks?.map((props, idx) => (
+          <Task key={idx} boardId={id} {...props} />
+        ))}
+      </CardContent>
       <CardContent className={classes.cardActions}>
-        <Button onClick={deleteBoardHandler}>DELETE</Button>
+        <Button onClick={toggleEditing}>Edit</Button>
+        <Button onClick={deleteBoardHandler}>Delete</Button>
       </CardContent>
     </Card>
   );
